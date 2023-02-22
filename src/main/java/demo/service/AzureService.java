@@ -57,17 +57,17 @@ public class AzureService {
 
     }
 
-    public static ResponseEntity<?> postWorkItem(AzurePost azurePostBody, String project, String type,
+    public static Object postWorkItem(AzurePost azurePostBody, String project, String type,
             final String PAT) throws IOException {
 
         CommonFunctions commonFunctions = new CommonFunctions();
 
         if (azurePostBody.getAssignedTo() == null || azurePostBody.getDescription() == null
                 || azurePostBody.getTitle() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return null;
         }
         if (PAT == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            return null;
         }
 
         String userpass = "" + ":" + PAT;
@@ -95,7 +95,7 @@ public class AzureService {
 
         Object body = commonFunctions.createPostBody(azurePostBody, parentUrl);
         if (body == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return null;
         }
 
         String basicAuth = new String(Base64.getEncoder().encode(userpass.getBytes()));
@@ -106,20 +106,22 @@ public class AzureService {
         ResponseEntity<Object> response = commonFunctions.callPostAPI(url, entity);
         System.out.println(response.getStatusCodeValue());
         if (response.getStatusCodeValue() != 200) {
-            return ResponseEntity.status(response.getStatusCode()).body(null);
+            return null;
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(response.getBody());
+        Map<Object, Object> resp= (Map<Object, Object>) response.getBody();
+
+        return(resp.get("id"));
     }
 
-    public static ResponseEntity<?> patchWorkItem(AzurePatch azurePatchBody, String project, Long id,
+    public static Object patchWorkItem(AzurePatch azurePatchBody, String project, Long id,
             final String PAT) throws IOException {
         CommonFunctions commonFunctions = new CommonFunctions();
 
         if (azurePatchBody == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return null;
         }
         if (PAT == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            return null;
         }
 
         String userpass = "" + ":" + PAT;
@@ -148,7 +150,7 @@ public class AzureService {
         Object patchBody = commonFunctions.createPatchBody(azurePatchBody, parentUrl,
                 rev);
         if (patchBody == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return null;
         }
 
         String basicAuth = new String(Base64.getEncoder().encode(userpass.getBytes()));
@@ -158,9 +160,11 @@ public class AzureService {
         HttpEntity entity = new HttpEntity(patchBody, headers);
         ResponseEntity<Object> response = commonFunctions.callPatchAPI(url, entity);
         if (response.getStatusCodeValue() != 200) {
-            return ResponseEntity.status(response.getStatusCode()).body(null);
+            return null;
         }
-        return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
+        Map<Object, Object> resp= (Map<Object, Object>) response.getBody();
+
+        return(resp.get("id"));
     }
 
 }

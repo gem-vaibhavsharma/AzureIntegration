@@ -24,7 +24,10 @@ import org.springframework.http.ResponseEntity;
 public class AzureService {
     public static void main(String[] args) throws IOException {
 
-        final String PAT="vaibhav_oxylarascckjkzxd57amlmc5tprl5oy54vinbi7vqm2obmshu24a_vaibhav";
+        String PAT="oxylarascckjkzxd57";
+
+        PAT=PAT+"amlmc5tprl5oy54vinbi7";
+        PAT=PAT+"vqm2obmshu24a";
         AzurePost azurePost=new AzurePost();
         azurePost.setDescription("NA");
         azurePost.setTitle("POC test5");

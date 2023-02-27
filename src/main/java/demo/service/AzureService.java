@@ -22,11 +22,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class AzureService {
-    public static void main(String[] args) {
-        // SpringApplication.run(DemoApplication.class, args);
-        // AzureService azureService = new AzureService();
-        // azureService.getWorkItem("Azure API", 1758L,
-        // "aofm6ujy5vny5rrc72tvp5nrapovstrbzqiajqarf7ognqqkfftq");
+    public static void main(String[] args) throws IOException {
+
+        final String PAT="vaibhav_oxylarascckjkzxd57amlmc5tprl5oy54vinbi7vqm2obmshu24a_vaibhav";
+        AzurePost azurePost=new AzurePost();
+        azurePost.setDescription("NA");
+        azurePost.setTitle("POC test5");
+        azurePost.setAssignedTo("Vaibhav.A.Sharma@geminisolutions.com");
+
+        postWorkItem(azurePost,"Azure API","task",PAT);
     }
 
     public static ResponseEntity<?> getWorkItem(String project, Long id,
@@ -67,6 +71,13 @@ public class AzureService {
             return null;
         }
         if (PAT == null) {
+            return null;
+        }
+        if(azurePostBody.getTitle()==null && project==null){
+            return null;
+        }
+        int titleId=commonFunctions.titleQuery(azurePostBody.getTitle(),project,PAT);
+        if(titleId==0){
             return null;
         }
 
@@ -111,6 +122,7 @@ public class AzureService {
         Map<Object, Object> resp= (Map<Object, Object>) response.getBody();
 
         return(resp.get("id"));
+
     }
 
     public static Object patchWorkItem(AzurePatch azurePatchBody, String project, Long id,
@@ -128,6 +140,14 @@ public class AzureService {
         String url = "https://dev.azure.com/GEM-QualityEngineering/" + project +
                 "/_apis/wit/workitems/" + id
                 + "?api-version=7.0";
+        if(azurePatchBody.getTitle()!=null && project==null){
+
+            int titleId=commonFunctions.titleQuery(azurePatchBody.getTitle(),project,PAT);
+            if(titleId==0){
+                return null;
+            }
+            System.out.println(titleId);
+        }
         String parentUrl = null;
         Map<Object, Object> body = (Map<Object, Object>) getWorkItem(project, id,
                 PAT).getBody();

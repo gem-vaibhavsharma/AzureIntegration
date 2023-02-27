@@ -1,5 +1,6 @@
 package demo.generalFunctions;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
@@ -13,6 +14,16 @@ import org.springframework.web.client.RestTemplate;
 
 import demo.model.AzurePatch;
 import demo.model.AzurePost;
+import org.springframework.http.HttpEntity;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+
+import org.springframework.http.ResponseEntity;
+
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Map;
 
 public class CommonFunctions {
 
@@ -34,6 +45,45 @@ public class CommonFunctions {
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
         return restTemplate.exchange(url, HttpMethod.PATCH, entity, Object.class);
 
+    }
+    public static int titleQuery(String title, String project,String PAT){
+        Object query="{\n" +
+                "    \"query\": \"Select [System.Title] From WorkItems Where [System.Title] Contains '"+title+"'And [System.TeamProject] = '"+project+"'\"\n" +
+                "}\n";
+        String url="https://dev.azure.com/GEM-QualityEngineering/"+project+"/_apis/wit/wiql?api-version=6.0\n";
+        String userpass = "" + ":" + PAT;
+        String basicAuth = new String(Base64.getEncoder().encode(userpass.getBytes()));
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setBasicAuth(basicAuth);
+        headers.add("Content-Type", "application/json");
+        HttpEntity entity = new HttpEntity(query, headers);
+        ResponseEntity<Object> response = callPostAPI(url, entity);
+        Map<Object,Object> body= (Map<Object, Object>) response.getBody();
+
+        ArrayList<Object> workItem= (ArrayList<Object>) body.get("workItems");
+
+        int id=0;
+        if (workItem.size()==0){
+
+            return id;
+        }
+        Map<Object,Object> fields= (Map<Object, Object>) workItem.get(0);
+        if(fields==null){
+
+            return id;
+        }
+
+        if(fields.containsKey("id")){
+            id= (int) fields.get("id");
+        }
+       if(id!=0){
+
+           return id;
+       }
+
+
+        return id;
     }
 
     public static String createPostBody(AzurePost azurePostBody, String parentUrl) {
